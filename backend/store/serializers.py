@@ -36,4 +36,4 @@ class ProductSerializer(serializers.ModelSerializer):
         
         # We protect these fields from being edited directly by the API consumer
         # 'seller' will be set automatically based on the logged-in user.
-        read_only_fields = ['seller'] 
+        read_only_fields = ['seller', 'slug']

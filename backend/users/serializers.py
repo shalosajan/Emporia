@@ -55,3 +55,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['role'] = user.role
         
         return token
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'address', 'city', 'postal_code']
+        read_only_fields = ['id', 'email', 'username'] # Email/Username shouldn't be changed here easily

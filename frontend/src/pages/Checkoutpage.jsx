@@ -23,7 +23,7 @@ const loadScript = (src) => {
 
 function CheckoutPage() {
   const { user } = useAuth();
-  const { cartItems, getCartTotal } = useCart();
+  const { cartItems, getCartTotal,clearCart } = useCart();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -98,7 +98,8 @@ function CheckoutPage() {
             await api.post('/api/orders/verify-payment/', verificationData);
 
             // Payment is successful!
-            // TODO: Clear the cart
+            clearCart(); // Clear the cart from state and localStorage
+
             navigate('/order-success'); // Redirect to a success page
 
           } catch (verifyError) {

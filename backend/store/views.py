@@ -22,6 +22,14 @@ class ProductListView(generics.ListAPIView):
     queryset = Product.objects.filter(available=True)
     serializer_class = ProductSerializer
     permission_classes = [permissions.AllowAny] # Anyone can see products
+    
+    # Add filtering and search capabilities
+    from django_filters.rest_framework import DjangoFilterBackend
+    from rest_framework import filters
+    
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['category'] # Allow filtering by category ID
+    search_fields = ['name', 'description'] # Allow searching by name or description
 
 class ProductDetailView(generics.RetrieveAPIView):
     """

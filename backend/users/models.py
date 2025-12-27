@@ -17,6 +17,11 @@ class CustomUser(AbstractUser):
     # We use email as the unique identifier for login
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=50, choices=Role.choices, default=Role.CUSTOMER)
+    
+    # Profile Fields
+    address = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    postal_code = models.CharField(max_length=20, blank=True, null=True)
 
     # Tell Django to use 'email' as the login field
     USERNAME_FIELD = 'email'

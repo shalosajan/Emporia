@@ -90,6 +90,19 @@ class StartPaymentView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+# --- 4. View for Listing User's Orders ---
+
+class MyOrdersListView(generics.ListAPIView):
+    """
+    Returns a list of orders made by the currently authenticated user.
+    """
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter orders where the 'customer' matches the current user
+        return Order.objects.filter(customer=self.request.user).order_by('-created_at')
+
 # --- 3. View for Verifying the Payment ---
 
 class PaymentVerificationView(APIView):

@@ -1,7 +1,7 @@
 # users/views.py
 
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import MyTokenObtainPairSerializer, UserRegistrationSerializer # Update this import
+from .serializers import MyTokenObtainPairSerializer, UserRegistrationSerializer, UserProfileSerializer
 from .models import CustomUser
 from rest_framework import generics, permissions
 
@@ -21,3 +21,14 @@ class MyTokenObtainPairView(TokenObtainPairView):
     user data (email, role) in the token.
     """
     serializer_class = MyTokenObtainPairSerializer
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    """
+    Endpoint for users to view and update their profile details.
+    """
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        # Return the currently authenticated user
+        return self.request.user

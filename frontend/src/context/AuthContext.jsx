@@ -10,10 +10,10 @@ const AuthContext = createContext();
 // Create the provider component
 export function AuthProvider({ children }) {
   // Try to get auth data from localStorage on initial load
-  const [authToken, setAuthToken] = useState(() => 
+  const [authToken, setAuthToken] = useState(() =>
     localStorage.getItem('authToken') ? JSON.parse(localStorage.getItem('authToken')) : null
   );
-  const [user, setUser] = useState(() => 
+  const [user, setUser] = useState(() =>
     localStorage.getItem('authToken') ? jwtDecode(JSON.parse(localStorage.getItem('authToken')).access) : null
   );
   const [loading, setLoading] = useState(false);
@@ -37,8 +37,8 @@ export function AuthProvider({ children }) {
       setUser(decodedUser);
       console.log();
       localStorage.setItem('authToken', JSON.stringify(tokens));
-      
-      return true; // Signal success
+
+      return decodedUser; // Signal success and return user data
     } catch (err) {
       console.error('Login error:', err.response?.data?.detail || err.message);
       throw new Error(err.response?.data?.detail || 'Login failed');

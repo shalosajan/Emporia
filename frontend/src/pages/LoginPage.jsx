@@ -8,7 +8,7 @@ function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  
+
   const { login, loading } = useAuth(); // <-- Get login function and loading state
   const navigate = useNavigate();
 
@@ -18,11 +18,15 @@ function LoginPage() {
 
     try {
       // Call the login function from our context
-      const success = await login(email, password);
-      
-      if (success) {
-        // Redirect to home page on success
-        navigate('/');
+      const user = await login(email, password);
+
+      if (user) {
+        // Redirect based on role
+        if (user.role === 'SELLER') {
+          navigate('/seller/dashboard');
+        } else {
+          navigate('/');
+        }
       }
     } catch (err) {
       setError(err.message || 'Failed to log in. Please check your credentials.');
@@ -32,9 +36,9 @@ function LoginPage() {
   return (
     <div className="max-w-md mx-auto mt-10">
       <h1 className="text-3xl font-bold text-center mb-6">Login to Emporia</h1>
-      
+
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
             {error}
@@ -77,7 +81,7 @@ function LoginPage() {
           >
             {loading ? 'Logging in...' : 'Sign In'}
           </button>
-          
+
           <Link to="/register" className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
             Create an Account
           </Link>

@@ -16,10 +16,15 @@ import CartPage from './pages/CartPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import CheckoutPage from './pages/Checkoutpage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
+import SellerDashboard from './pages/SellerDashboard';
+import AddProductPage from './pages/AddProductPage';
+import EditProductPage from './pages/EditProductPage';
+import OrderHistoryPage from './pages/OrderHistoryPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
-<Routes>
+    <Routes>
       {/* --- Public Routes --- */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
@@ -27,14 +32,19 @@ function App() {
         <Route path="register" element={<RegisterPage />} />
         <Route path="products/:slug" element={<ProductDetailPage />} />
         <Route path="cart" element={<CartPage />} />
-        
+
         {/* --- Protected Routes --- */}
         <Route element={<ProtectedRoute />}>
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="order-success" element={<OrderSuccessPage />} />
+          <Route path="orders/history" element={<OrderHistoryPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="seller/dashboard" element={<SellerDashboard />} />
+          <Route path="seller/add-product" element={<AddProductPage />} />
+          <Route path="seller/edit-product/:slug" element={<EditProductPage />} />
           {/* Add other protected routes here, e.g., /account */}
         </Route>
-        
+
       </Route>
     </Routes>
   );
@@ -46,7 +56,7 @@ function MainLayout() {
     // Use flex-col and min-h-screen to make the footer
     // stick to the bottom of the page
     <div className="flex flex-col min-h-screen">
-      
+
       {/* 1. Use the real Navbar component */}
       <Navbar />
 
@@ -57,7 +67,7 @@ function MainLayout() {
 
       {/* 2. Use the real Footer component */}
       <Footer />
-      
+
     </div>
   );
 }

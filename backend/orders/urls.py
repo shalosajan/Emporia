@@ -12,4 +12,7 @@ urlpatterns = [
     
     # 3. POST to this with Razorpay IDs to verify payment
     path('verify-payment/', views.PaymentVerificationView.as_view(), name='verify-payment'),
+
+    # 4. GET this to see logged-in user's orders
+    path('my-orders/', views.MyOrdersListView.as_view(), name='my-orders'),
 ]
