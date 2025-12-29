@@ -15,7 +15,7 @@ const AdminProducts = () => {
 
     const fetchProducts = async () => {
         try {
-            const response = await api.get('/store/admin/products/');
+            const response = await api.get('/api/admin/products/');
             setProducts(response.data);
             setLoading(false);
         } catch (error) {
@@ -32,7 +32,7 @@ const AdminProducts = () => {
     const confirmDelete = async () => {
         if (!productToDelete) return;
         try {
-            await api.delete(`/store/products/${productToDelete.slug}/`); // Admin can delete any product
+            await api.delete(`/api/admin/products/${productToDelete.slug}/`); // Admin endpoint
             setProducts(products.filter(p => p.id !== productToDelete.id));
             setModalOpen(false);
             setProductToDelete(null);

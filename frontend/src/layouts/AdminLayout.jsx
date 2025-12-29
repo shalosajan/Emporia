@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 
 const AdminLayout = () => {
-    const { user, logoutUser } = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
     const location = useLocation();
 
     const isActive = (path) => {
@@ -35,11 +35,18 @@ const AdminLayout = () => {
                     <Link to="/admin/orders" className={`block px-4 py-2 rounded transition-colors ${isActive('/admin/orders')}`}>
                         Orders
                     </Link>
+
+                    {/* Only Visible to Super Admins */}
+                    {user.staff_level === 'SUPER_ADMIN' && (
+                        <Link to="/admin/team" className={`block px-4 py-2 rounded transition-colors ${isActive('/admin/team')}`}>
+                            Team Management
+                        </Link>
+                    )}
                 </nav>
 
                 <div className="p-4 border-t border-gray-700">
                     <button
-                        onClick={logoutUser}
+                        onClick={logout}
                         className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                     >
                         Logout

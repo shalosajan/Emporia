@@ -4,7 +4,7 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-function ProtectedRoute() {
+function ProtectedRoute({ children }) {
   const { user } = useAuth(); // Get the current user
 
   if (!user) {
@@ -13,8 +13,8 @@ function ProtectedRoute() {
     return <Navigate to="/login" replace />;
   }
 
-  // If user is logged in, render the child component (e.g., CheckoutPage)
-  return <Outlet />;
+  // If user is logged in, render the child component if exists, otherwise Outlet
+  return children ? children : <Outlet />;
 }
 
 export default ProtectedRoute;

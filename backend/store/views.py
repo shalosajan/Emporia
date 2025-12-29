@@ -4,6 +4,7 @@ from rest_framework import generics, permissions
 from .models import Product, Category
 from .serializers import ProductSerializer, CategorySerializer
 from .permissions import IsApprovedSeller, IsProductOwner
+from users.permissions import IsSupport, IsManager, IsSuperAdmin
 
 # --- 1. Public Views (for Customers) ---
 
@@ -90,3 +91,38 @@ class SellerProductDetailView(generics.RetrieveUpdateDestroyAPIView):
         """
         user_profile = self.request.user.sellerprofile
         return Product.objects.filter(seller=user_profile)
+
+# --- 3. Admin Views (Staff Management) ---
+
+class AdminProductListView(generics.ListAPIView):
+    """
+    Admin: Lists ALL products (including unavailable ones).
+    """
+    queryset = Product.objects.all().order_by('-created_at')
+    serializer_class = ProductSerializer
+    permission_classes = [IsSupport] # Support and above can view.
+
+class AdminProductDetailView(generics.RetrieveDestroyAPIView):
+    """
+    Admin: Delete Products.
+    """
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsManager] # Managers/SuperAdmin can delete.
+    lookup_field = 'slug'
+
+class AdminCategoryView(generics.ListCreateAPIView):
+    """
+    Admin: Manage Categories.
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsManager] # Managers can Create Categories.
+
+class AdminCategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Admin: Edit/Delete Categories.
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsSuperAdmin] # Only SuperAdmin can Delete Categories.

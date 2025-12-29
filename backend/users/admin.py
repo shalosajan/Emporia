@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, SellerProfile
+from .models import CustomUser, SellerProfile, StaffProfile, AuditLog
 
 # This class customizes how the CustomUser is displayed
 class CustomUserAdmin(UserAdmin):

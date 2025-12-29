@@ -16,7 +16,7 @@ const AdminCategories = () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await api.get('/store/admin/categories/');
+            const response = await api.get('/api/admin/categories/');
             setCategories(response.data);
         } catch (error) {
             console.error("Error fetching categories:", error);
@@ -26,7 +26,7 @@ const AdminCategories = () => {
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
-            const response = await api.post('/store/admin/categories/', { name: newCategoryName, slug: newCategoryName.toLowerCase().replace(/ /g, '-') });
+            const response = await api.post('/api/admin/categories/', { name: newCategoryName, slug: newCategoryName.toLowerCase().replace(/ /g, '-') });
             setCategories([...categories, response.data]);
             setNewCategoryName('');
         } catch (error) {
@@ -39,7 +39,7 @@ const AdminCategories = () => {
         e.preventDefault();
         if (!editingCategory) return;
         try {
-            const response = await api.patch(`/store/admin/categories/${editingCategory.id}/`, {
+            const response = await api.patch(`/api/admin/categories/${editingCategory.id}/`, {
                 name: editingCategory.name,
                 slug: editingCategory.name.toLowerCase().replace(/ /g, '-')
             });
@@ -59,7 +59,7 @@ const AdminCategories = () => {
     const confirmDelete = async () => {
         if (!categoryToDelete) return;
         try {
-            await api.delete(`/store/admin/categories/${categoryToDelete.id}/`);
+            await api.delete(`/api/admin/categories/${categoryToDelete.id}/`);
             setCategories(categories.filter(c => c.id !== categoryToDelete.id));
             setModalOpen(false);
             setCategoryToDelete(null);

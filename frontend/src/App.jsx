@@ -28,7 +28,10 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
+import TeamManagement from './pages/admin/TeamManagement';
+import AdminLoginPage from './pages/AdminLoginPage';
 
+// Main App Component - Force Rebuild
 function App() {
   return (
     <Routes>
@@ -54,6 +57,8 @@ function App() {
       </Route>
 
       {/* --- Admin Layout Routes (Separate Layout) --- */}
+      <Route path="/admin-secure-portal" element={<AdminLoginPage />} />
+
       <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} /> {/* Default to dashboard */}
         <Route path="dashboard" element={<AdminDashboard />} />
@@ -61,6 +66,7 @@ function App() {
         <Route path="products" element={<AdminProducts />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="orders" element={<AdminOrders />} />
+        <Route path="team" element={<TeamManagement />} />
       </Route>
     </Routes>
   );

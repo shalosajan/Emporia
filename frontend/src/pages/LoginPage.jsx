@@ -24,6 +24,9 @@ function LoginPage() {
         // Redirect based on role
         if (user.role === 'SELLER') {
           navigate('/seller/dashboard');
+        } else if (user.role === 'STAFF') {
+          navigate('/admin/dashboard');
+          // Note: SuperUsers are blocked from this login form by the API
         } else {
           navigate('/');
         }

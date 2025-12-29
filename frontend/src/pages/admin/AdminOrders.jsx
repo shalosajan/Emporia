@@ -12,7 +12,7 @@ const AdminOrders = () => {
 
     const fetchOrders = async () => {
         try {
-            const response = await api.get('/orders/admin-orders/');
+            const response = await api.get('/api/orders/admin-orders/');
             setOrders(response.data);
             setLoading(false);
         } catch (error) {
@@ -41,12 +41,12 @@ const AdminOrders = () => {
                         {orders.map((order) => (
                             <tr key={order.id}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{order.id}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.user}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${order.total_price}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.customer_email}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${order.total_cost}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.is_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                         }`}>
-                                        {order.is_paid ? 'Paid' : 'Pending'}
+                                        {order.paid ? 'Paid' : 'Pending'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

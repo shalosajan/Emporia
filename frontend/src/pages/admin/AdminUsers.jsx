@@ -16,7 +16,7 @@ const AdminUsers = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await api.get('/auth/admin/users/');
+            const response = await api.get('/api/auth/admin/users/');
             setUsers(response.data);
             setLoading(false);
         } catch (error) {
@@ -27,7 +27,7 @@ const AdminUsers = () => {
 
     const handleApproveSeller = async (userId) => {
         try {
-            await api.patch(`/auth/admin/users/${userId}/`, { seller_approved: true });
+            await api.patch(`/api/auth/admin/users/${userId}/`, { seller_approved: true });
             forceUpdateUser(userId, { seller_approved: true });
         } catch (error) {
             console.error("Error approving seller:", error);
@@ -39,7 +39,7 @@ const AdminUsers = () => {
         // Toggle block status
         const newStatus = !user.is_active;
         try {
-            await api.patch(`/auth/admin/users/${user.id}/`, { is_active: newStatus });
+            await api.patch(`/api/auth/admin/users/${user.id}/`, { is_active: newStatus });
             forceUpdateUser(user.id, { is_active: newStatus });
         } catch (error) {
             console.error("Error block/unblocking user:", error);

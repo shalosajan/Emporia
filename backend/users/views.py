@@ -1,7 +1,7 @@
 # users/views.py
 
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import MyTokenObtainPairSerializer, UserRegistrationSerializer, UserProfileSerializer
+from .serializers import MyTokenObtainPairSerializer, AdminTokenObtainPairSerializer, UserRegistrationSerializer, UserProfileSerializer
 from .models import CustomUser
 from rest_framework import generics, permissions
 
@@ -17,10 +17,15 @@ class UserRegistrationView(generics.CreateAPIView):
     
 class MyTokenObtainPairView(TokenObtainPairView):
     """
-    This custom view uses our custom serializer to include
-    user data (email, role) in the token.
+    Public Login: BLOCKS SuperUsers.
     """
     serializer_class = MyTokenObtainPairSerializer
+
+class AdminTokenObtainPairView(TokenObtainPairView):
+    """
+    Admin Login: ALLOWS SuperUsers.
+    """
+    serializer_class = AdminTokenObtainPairSerializer
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     """
@@ -38,7 +43,8 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 from .serializers import AdminUserSerializer
 
 class AdminUserListView(generics.ListAPIView):
-    queryset = CustomUser.objects.all().order_by('-date_joined')
+    # Filter to show only Customers and Sellers (Exclude Staff/Admins from this view)
+    queryset = CustomUser.objects.filter(role__in=[CustomUser.Role.CUSTOMER, CustomUser.Role.SELLER]).order_by('-date_joined')
     serializer_class = AdminUserSerializer
     permission_classes = [permissions.IsAdminUser]
 
@@ -61,8 +67,8 @@ class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from orders.models import Order
-from django.db.models import Sum
+from orders.models import Order, OrderItem
+from django.db.models import Sum, F, DecimalField
 
 class AdminStatsView(APIView):
     permission_classes = [permissions.IsAdminUser]
@@ -70,10 +76,85 @@ class AdminStatsView(APIView):
     def get(self, request):
         total_users = CustomUser.objects.count()
         total_orders = Order.objects.count()
-        total_revenue = Order.objects.filter(paid=True).aggregate(Sum('total_cost'))['total_cost__sum'] or 0
+        # Calculate revenue by summing (price * quantity) of all items in PAID orders
+        total_revenue = OrderItem.objects.filter(order__paid=True).aggregate(
+            revenue=Sum(F('price') * F('quantity'), output_field=DecimalField())
+        )['revenue'] or 0
 
         return Response({
             "total_users": total_users,
             "total_orders": total_orders,
             "total_revenue": total_revenue
         })
+
+# --- Staff Management Views ---
+from .models import StaffProfile, AuditLog
+from .serializers import StaffUserSerializer, StaffUpdateSerializer
+from .permissions import IsSuperAdmin
+from rest_framework.exceptions import PermissionDenied
+
+class StaffListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsSuperAdmin] # Only Super Admins can manage staff
+    serializer_class = StaffUserSerializer
+    
+    def get_queryset(self):
+        return CustomUser.objects.filter(role=CustomUser.Role.STAFF).order_by('-date_joined')
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        # Audit Log
+        AuditLog.objects.create(
+            actor=self.request.user,
+            action="CREATED_STAFF",
+            target=user.email,
+            details=f"Role: {user.staffprofile.role_level}"
+        )
+
+class StaffDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsSuperAdmin]
+    queryset = CustomUser.objects.filter(role=CustomUser.Role.STAFF)
+    
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return StaffUpdateSerializer
+        return StaffUserSerializer
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        # Self-Protection
+        if instance.id == self.request.user.id:
+            raise PermissionDenied("You cannot modify your own staff account.")
+            
+        serializer.save()
+        
+        # Audit Log
+        AuditLog.objects.create(
+            actor=self.request.user,
+            action="UPDATED_STAFF",
+            target=instance.email,
+            details=f"Data: {serializer.validated_data}"
+        )
+
+    def perform_destroy(self, instance):
+        # Self-Protection
+        if instance.id == self.request.user.id:
+            raise PermissionDenied("You cannot delete your own staff account.")
+        
+        email = instance.email
+        # Deactivate instead of hard delete (soft delete)? 
+        # Requirement said "Deactivate Account: A 'Kill Switch'".
+        # But method is destroy. Let's do hard delete or deactivation?
+        # Standard destroy is delete. Let's stick to delete for now as 'Kill Switch' usually implies Deactivate.
+        # But if the user clicks Delete, they expect Delete.
+        # Let's Implement Deactivation via UPDATE (is_active=False).
+        # This view allows DELETE http verb which does hard delete.
+        # We can keep hard delete for cleanup.
+        
+        instance.delete()
+        
+        # Audit Log
+        AuditLog.objects.create(
+            actor=self.request.user,
+            action="DELETED_STAFF",
+            target=email
+        )

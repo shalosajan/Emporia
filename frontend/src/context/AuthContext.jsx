@@ -20,11 +20,14 @@ export function AuthProvider({ children }) {
 
   // --- Login Function ---
   // This will be called from our LoginPage
-  const login = async (email, password) => {
+  const login = async (email, password, isAdmin = false) => {
     setLoading(true);
     try {
       // 1. Get tokens from the DRF 'simple-jwt' endpoint
-      const response = await api.post('/api/auth/token/', {
+      // If isAdmin is true, use the dedicated admin endpoint
+      const endpoint = isAdmin ? '/api/auth/admin-login/' : '/api/auth/token/';
+
+      const response = await api.post(endpoint, {
         email,
         password,
       });

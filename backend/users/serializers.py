@@ -42,19 +42,63 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         return user
     
+from rest_framework import exceptions
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Public Login: BLOCKS SuperUsers.
+    """
     @classmethod
     def get_token(cls, user):
-        # This is the default method, which creates the token
         token = super().get_token(user)
-
-        # --- Add custom claims ---
-        # We add the user's data to the token
         token['email'] = user.email
         token['username'] = user.username
         token['role'] = user.role
         
+        # Staff Level might be needed for Staff redirection, but SuperUser is blocked.
+        if hasattr(user, 'staffprofile'):
+            token['staff_level'] = user.staffprofile.role_level
+        else:
+            token['staff_level'] = None
+            
         return token
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        
+        # BLOCK SUPERUSER
+        if self.user.is_superuser:
+            raise exceptions.PermissionDenied("Superusers must use the Admin Entry Point.")
+            
+        return data
+
+class AdminTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Admin Login: ALLOWS SuperUsers.
+    """
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['email'] = user.email
+        token['username'] = user.username
+        token['role'] = user.role
+        
+        if user.is_superuser:
+            token['staff_level'] = 'SUPER_ADMIN'
+        elif hasattr(user, 'staffprofile'):
+            token['staff_level'] = user.staffprofile.role_level
+        else:
+            token['staff_level'] = None
+        
+        return token
+    
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        # STRICTLY BLOCK NON-SUPERUSERS
+        # Staff must use the public login portal.
+        if not self.user.is_superuser:
+             raise exceptions.PermissionDenied("This portal is restricted to Super Administrators only.")
+        return data
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,3 +117,70 @@ class AdminUserSerializer(serializers.ModelSerializer):
         if obj.role == 'SELLER' and hasattr(obj, 'sellerprofile'):
             return obj.sellerprofile.is_approved
         return None
+
+# --- New Staff Serializers ---
+from .models import StaffProfile
+
+class StaffProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StaffProfile
+        fields = ['role_level', 'department']
+
+class StaffUserSerializer(serializers.ModelSerializer):
+    staff_profile = StaffProfileSerializer(source='staffprofile', read_only=True)
+    role_level = serializers.ChoiceField(choices=StaffProfile.Level.choices, write_only=True)
+    department = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'email', 'username', 'password', 'is_active', 'date_joined', 'staff_profile', 'role_level', 'department']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        role_level = validated_data.pop('role_level', StaffProfile.Level.SUPPORT)
+        department = validated_data.pop('department', '')
+        password = validated_data.get('password')
+        
+        # Force the role to STAFF
+        validated_data['role'] = CustomUser.Role.STAFF
+        
+        # Create user using the manager method (handles hashing)
+        # Note: create_user expects positional args or kwargs. 
+        # We need to manually handle what create_user expects if we pass **validated_data directly
+        # But CustomUser.objects.create_user signature is (email, username, password=None, **extra_fields)
+        
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            password=password,
+            role=CustomUser.Role.STAFF
+        )
+        
+        # Create profile
+        StaffProfile.objects.create(user=user, role_level=role_level, department=department)
+        return user
+
+class StaffUpdateSerializer(serializers.ModelSerializer):
+    role_level = serializers.ChoiceField(choices=StaffProfile.Level.choices, required=False)
+    department = serializers.CharField(required=False, allow_blank=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['is_active', 'role_level', 'department']
+
+    def update(self, instance, validated_data):
+        # Update User fields
+        if 'is_active' in validated_data:
+            instance.is_active = validated_data['is_active']
+            instance.save()
+            
+        # Update Profile fields if they exist
+        if hasattr(instance, 'staffprofile'):
+            profile = instance.staffprofile
+            if 'role_level' in validated_data:
+                profile.role_level = validated_data['role_level']
+            if 'department' in validated_data:
+                profile.department = validated_data['department']
+            profile.save()
+        
+        return instance
