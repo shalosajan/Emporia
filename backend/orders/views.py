@@ -103,6 +103,16 @@ class MyOrdersListView(generics.ListAPIView):
         # Filter orders where the 'customer' matches the current user
         return Order.objects.filter(customer=self.request.user).order_by('-created_at')
 
+# --- 5. Admin View for Listing All Orders ---
+
+class AdminOrderListView(generics.ListAPIView):
+    """
+    Returns a list of ALL orders (for admins).
+    """
+    queryset = Order.objects.all().order_by('-created_at')
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAdminUser]
+
 # --- 3. View for Verifying the Payment ---
 
 class PaymentVerificationView(APIView):

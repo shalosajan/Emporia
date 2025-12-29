@@ -61,3 +61,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'address', 'city', 'postal_code']
         read_only_fields = ['id', 'email', 'username'] # Email/Username shouldn't be changed here easily
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    seller_approved = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'role', 'is_active', 'date_joined', 'seller_approved']
+
+    def get_seller_approved(self, obj):
+        if obj.role == 'SELLER' and hasattr(obj, 'sellerprofile'):
+            return obj.sellerprofile.is_approved
+        return None

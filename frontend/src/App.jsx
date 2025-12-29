@@ -22,10 +22,17 @@ import EditProductPage from './pages/EditProductPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import ProfilePage from './pages/ProfilePage';
 
+import AdminDashboard from './pages/AdminDashboard';
+import AdminLayout from './layouts/AdminLayout';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminOrders from './pages/admin/AdminOrders';
+
 function App() {
   return (
     <Routes>
-      {/* --- Public Routes --- */}
+      {/* --- Public Routes & Main Layout --- */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="login" element={<LoginPage />} />
@@ -39,12 +46,21 @@ function App() {
           <Route path="order-success" element={<OrderSuccessPage />} />
           <Route path="orders/history" element={<OrderHistoryPage />} />
           <Route path="profile" element={<ProfilePage />} />
+
           <Route path="seller/dashboard" element={<SellerDashboard />} />
           <Route path="seller/add-product" element={<AddProductPage />} />
           <Route path="seller/edit-product/:slug" element={<EditProductPage />} />
-          {/* Add other protected routes here, e.g., /account */}
         </Route>
+      </Route>
 
+      {/* --- Admin Layout Routes (Separate Layout) --- */}
+      <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+        <Route index element={<AdminDashboard />} /> {/* Default to dashboard */}
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="products" element={<AdminProducts />} />
+        <Route path="categories" element={<AdminCategories />} />
+        <Route path="orders" element={<AdminOrders />} />
       </Route>
     </Routes>
   );

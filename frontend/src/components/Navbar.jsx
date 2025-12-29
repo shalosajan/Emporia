@@ -52,6 +52,13 @@ function Navbar() {
                 My Profile
               </Link>
 
+              {/* Admin Link (Check if user is staff/superuser) */}
+              {(user.is_staff || user.is_superuser) && (
+                <Link to="/admin/dashboard" className="text-red-600 hover:text-red-800 font-bold">
+                  Admin
+                </Link>
+              )}
+
               <span className="text-gray-700">Hi, {user.username}!</span>
               <button
                 onClick={handleLogout}

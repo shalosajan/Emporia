@@ -15,4 +15,7 @@ urlpatterns = [
 
     # 4. GET this to see logged-in user's orders
     path('my-orders/', views.MyOrdersListView.as_view(), name='my-orders'),
+
+    # 5. GET this to see all orders (admin only)
+    path('admin-orders/', views.AdminOrderListView.as_view(), name='admin-orders'),
 ]

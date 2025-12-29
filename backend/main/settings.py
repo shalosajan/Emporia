@@ -20,6 +20,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -188,6 +189,19 @@ MEDIA_URL = '/media/'
 
 # This is the physical path on your server where files will be stored
 MEDIA_ROOT = BASE_DIR / 'media'
+
+MEDISTATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Jazzmin Settings
+JAZZMIN_SETTINGS = {
+    "site_title": "Emporia Admin",
+    "site_header": "Emporia",
+    "site_brand": "Emporia",
+    "welcome_sign": "Welcome to Emporia Admin",
+    "copyright": "Emporia Ltd",
+    "search_model": "users.CustomUser",
+    "show_ui_builder": False,
+}
 
 # -----------------------------------------------------------------
 # RAZORPAY CONFIGURATION
