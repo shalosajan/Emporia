@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Order
 from .serializers import OrderSerializer
+from users.permissions import IsSupport
 from django.conf import settings
 import razorpay
 from django.shortcuts import get_object_or_404
@@ -111,7 +112,7 @@ class AdminOrderListView(generics.ListAPIView):
     """
     queryset = Order.objects.all().order_by('-created_at')
     serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsSupport]
 
 # --- 3. View for Verifying the Payment ---
 

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import { useAlert } from '../../context/AlertContext';
 
 const AdminCategories = () => {
     // const api = useAxios(); // Removed
+    const { showAlert } = useAlert();
     const [categories, setCategories] = useState([]);
     const [newCategoryName, setNewCategoryName] = useState('');
     const [editingCategory, setEditingCategory] = useState(null);
@@ -31,7 +33,7 @@ const AdminCategories = () => {
             setNewCategoryName('');
         } catch (error) {
             console.error("Error creating category:", error);
-            alert("Failed to create category");
+            showAlert("Failed to create category", 'error');
         }
     };
 
@@ -47,7 +49,7 @@ const AdminCategories = () => {
             setEditingCategory(null);
         } catch (error) {
             console.error("Error updating category:", error);
-            alert("Failed to update category");
+            showAlert("Failed to update category", 'error');
         }
     };
 
@@ -65,7 +67,7 @@ const AdminCategories = () => {
             setCategoryToDelete(null);
         } catch (error) {
             console.error("Error deleting category:", error);
-            alert("Failed to delete category");
+            showAlert("Failed to delete category", 'error');
         }
     };
 

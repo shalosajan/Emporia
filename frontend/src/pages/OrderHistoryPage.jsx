@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import api from '../utils/api';
 import { Link } from 'react-router-dom';
+import api from '../utils/api';
+import { Package, Clock, CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react';
+import Card from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
 
 function OrderHistoryPage() {
     const [orders, setOrders] = useState([]);
@@ -14,7 +18,7 @@ function OrderHistoryPage() {
                 const response = await api.get('/api/orders/my-orders/');
                 setOrders(response.data);
             } catch (err) {
-                setError('Failed to load orders.');
+                setError('Failed to retrieve shipping logs.');
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -24,57 +28,79 @@ function OrderHistoryPage() {
         fetchOrders();
     }, []);
 
-    if (loading) return <div className="text-center mt-10">Loading orders...</div>;
+    if (loading) return (
+        <div className="flex justify-center items-center h-[50vh]">
+            <div className="animate-spin h-10 w-10 border-4 border-indigo-500 rounded-full border-t-transparent"></div>
+        </div>
+    );
 
-    if (error) return <div className="text-center mt-10 text-red-500">{error}</div>;
+    if (error) return (
+        <div className="flex justify-center items-center h-[50vh] text-red-400">
+            {error}
+        </div>
+    );
 
     return (
-        <div className="container mx-auto max-w-4xl">
-            <h1 className="text-3xl font-bold mb-8">My Orders</h1>
+        <div className="container mx-auto max-w-5xl px-6 py-12">
+            <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                <Package className="text-indigo-400" /> Shipping History
+            </h1>
+            <p className="text-gray-400 mb-8">Track your acquisitions across the galaxy.</p>
 
             {orders.length === 0 ? (
-                <div className="text-center text-gray-600 bg-white p-8 rounded shadow">
-                    <p className="text-lg">You haven't placed any orders yet.</p>
-                    <Link to="/" className="text-blue-600 hover:underline mt-4 block">
-                        Start Shopping
+                <Card className="p-12 text-center flex flex-col items-center">
+                    <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 text-gray-500">
+                        <Package size={40} />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">No Acquisitions Found</h3>
+                    <p className="text-gray-400 mb-6">You haven't secured any artifacts yet.</p>
+                    <Link to="/">
+                        <Button variant="primary">Explore Artifacts</Button>
                     </Link>
-                </div>
+                </Card>
             ) : (
                 <div className="space-y-6">
                     {orders.map((order) => (
-                        <div key={order.id} className="bg-white shadow rounded-lg p-6 border">
-                            <div className="flex justify-between items-center border-b pb-4 mb-4">
+                        <Card key={order.id} className="p-6 transition-all hover:bg-white/5">
+                            <div className="flex flex-col md:flex-row justify-between md:items-center border-b border-white/10 pb-4 mb-4 gap-4">
                                 <div>
-                                    <p className="font-bold text-gray-800">Order #{order.id}</p>
-                                    <p className="text-sm text-gray-500">
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                        Order #{order.id}
+                                    </h3>
+                                    <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                                        <Clock size={14} />
                                         Placed on: {new Date(order.created_at).toLocaleDateString()}
                                     </p>
                                 </div>
-                                <div className="text-right">
-                                    <p className={`font-bold ${order.paid ? 'text-green-600' : 'text-orange-500'}`}>
-                                        {order.paid ? 'Paid' : 'Pending Payment'}
-                                    </p>
-                                    <p className="font-bold text-xl">${order.total_cost || '0.00'}</p>
+                                <div className="flex items-center gap-4">
+                                    <Badge variant={order.paid ? 'success' : 'warning'} className="flex items-center gap-1">
+                                        {order.paid ? <CheckCircle size={12} /> : <AlertTriangle size={12} />}
+                                        {order.paid ? 'Paid' : 'Pending'}
+                                    </Badge>
+                                    <span className="text-2xl font-bold text-indigo-400">${order.total_cost || '0.00'}</span>
                                 </div>
                             </div>
 
                             {/* Order Items */}
-                            <div className="space-y-2">
-                                {order.items && order.items.map((item) => (
-                                    // Note: Backend serializer for Order might not explicitly include items details 
-                                    // unless we updated OrderSerializer to include nested items.
-                                    // Accessing nested product object from serializer
-                                    <div key={item.id} className="flex justify-between text-sm">
-                                        <span>{item.product?.name || 'Unknown Product'} (x{item.quantity})</span>
-                                        <span>${item.price}</span>
-                                    </div>
-                                ))
-                                }
-                                {(!order.items || order.items.length === 0) && (
-                                    <p className="text-sm text-gray-500 italic">Item details not available.</p>
-                                )}
+                            <div className="bg-black/20 rounded-lg p-4">
+                                <h4 className="text-xs font-bold text-gray-500 uppercase mb-3">Manifest</h4>
+                                <div className="space-y-3">
+                                    {order.items && order.items.map((item, idx) => (
+                                        <div key={idx} className="flex justify-between items-center text-sm">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center text-gray-600 text-xs">
+                                                    x{item.quantity}
+                                                </div>
+                                                <span className="text-gray-300 font-medium">
+                                                    {item.product?.name || `Artifact #${item.product_id || 'Unknown'}`}
+                                                </span>
+                                            </div>
+                                            <span className="text-gray-400 font-mono">${item.price}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        </Card>
                     ))}
                 </div>
             )}

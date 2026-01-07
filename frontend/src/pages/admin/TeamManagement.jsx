@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
+import { useAlert } from '../../context/AlertContext';
 
 const TeamManagement = () => {
-    const { user: currentUser } = useAuth();
+    const { user: currentUser, impersonate } = useAuth();
+    const { showAlert } = useAlert();
     const [staffList, setStaffList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
@@ -82,16 +84,16 @@ const TeamManagement = () => {
                     is_active: formData.is_active
                 };
                 await api.patch(`/api/auth/admin/staff/${editId}/`, updatePayload);
-                alert("Staff updated successfully");
+                showAlert("Staff updated successfully", 'success');
             } else {
                 await api.post('/api/auth/admin/staff/', formData);
-                alert("Staff created successfully");
+                showAlert("Staff created successfully", 'success');
             }
             setModalOpen(false);
             fetchStaff();
         } catch (error) {
             console.error("Error saving staff:", error);
-            alert("Failed to save staff. " + (error.response?.data?.detail || ""));
+            showAlert("Failed to save staff. " + (error.response?.data?.detail || ""), 'error');
         }
     };
 
@@ -103,7 +105,18 @@ const TeamManagement = () => {
             setStaffList(staffList.filter(s => s.id !== id));
         } catch (error) {
             console.error("Error deleting staff:", error);
-            alert("Failed to delete staff.");
+            showAlert("Failed to delete staff.", 'error');
+        }
+    };
+
+    const handleImpersonate = async (userId) => {
+        if (!window.confirm("Are you sure you want to impersonate this staff member? Audit logs will record this.")) return;
+        try {
+            await impersonate(userId);
+            window.location.href = '/admin/dashboard';
+        } catch (error) {
+            console.error("Impersonation failed:", error);
+            showAlert("Impersonation failed: " + (error.response?.data?.detail || ""), 'error');
         }
     };
 

@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     UserRegistrationView, UserProfileView, 
     AdminUserListView, AdminUserDetailView, AdminStatsView,
-    StaffListCreateView, StaffDetailView, AdminTokenObtainPairView
+    StaffListCreateView, StaffDetailView, AdminTokenObtainPairView,
+    ImpersonateUserView, AuditLogListView
 )
 
 urlpatterns = [
@@ -18,4 +19,10 @@ urlpatterns = [
     # Staff Management
     path('admin/staff/', StaffListCreateView.as_view(), name='admin_staff_list'),
     path('admin/staff/<int:pk>/', StaffDetailView.as_view(), name='admin_staff_detail'),
+
+    # Impersonation
+    path('admin/impersonate/', ImpersonateUserView.as_view(), name='admin_impersonate'),
+
+    # Audit Logs
+    path('admin/audit-logs/', AuditLogListView.as_view(), name='admin_audit_logs'),
 ]

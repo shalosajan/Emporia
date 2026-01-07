@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import { useAuth } from '../../context/AuthContext';
+import { useAlert } from '../../context/AlertContext';
 
 const AdminUsers = () => {
-    // const api = useAxios(); // Removed
+    const { impersonate } = useAuth();
+    const { showAlert } = useAlert();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [actionUser, setActionUser] = useState(null); // User being acted upon
     const [actionType, setActionType] = useState(null); // 'approve' or 'block'
+    const [impersonateId, setImpersonateId] = useState(null);
 
     useEffect(() => {
         fetchUsers();
@@ -31,7 +35,7 @@ const AdminUsers = () => {
             forceUpdateUser(userId, { seller_approved: true });
         } catch (error) {
             console.error("Error approving seller:", error);
-            alert("Failed to approve seller.");
+            showAlert("Failed to approve seller.", 'error');
         }
     };
 
@@ -43,7 +47,31 @@ const AdminUsers = () => {
             forceUpdateUser(user.id, { is_active: newStatus });
         } catch (error) {
             console.error("Error block/unblocking user:", error);
-            alert("Failed to update user status.");
+            showAlert("Failed to update user status.", 'error');
+        }
+    };
+
+    const handleImpersonate = (userId) => {
+        setImpersonateId(userId);
+        setModalOpen(true);
+    };
+
+    const confirmImpersonate = async () => {
+        if (!impersonateId) return;
+        setModalOpen(false);
+        try {
+            const user = await impersonate(impersonateId);
+            // Navigate based on role
+            if (user.role === 'SELLER') {
+                window.location.href = '/seller/dashboard';
+            } else {
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.error("Impersonation failed:", error);
+            showAlert("Impersonation failed.", 'error');
+        } finally {
+            setImpersonateId(null);
         }
     };
 
@@ -101,12 +129,29 @@ const AdminUsers = () => {
                                     >
                                         {user.is_active ? 'Block' : 'Unblock'}
                                     </button>
+                                    <button
+                                        onClick={() => handleImpersonate(user.id)}
+                                        className="ml-4 text-purple-600 hover:text-purple-900 inline-flex items-center"
+                                        title="Login as User"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                            <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+            <ConfirmationModal
+                isOpen={modalOpen && !!impersonateId}
+                title="Confirm Impersonation"
+                message="Are you sure you want to log in as this user? Usage will be audited."
+                onConfirm={confirmImpersonate}
+                onCancel={() => { setModalOpen(false); setImpersonateId(null); }}
+            />
         </div>
     );
 };

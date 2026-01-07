@@ -1,15 +1,17 @@
-// src/pages/LoginPage.jsx
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // <-- Import our custom hook
+import { useAuth } from '../context/AuthContext';
+import { Mail, Lock, LogIn, ArrowRight } from 'lucide-react';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import Card from '../components/ui/Card';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
-  const { login, loading } = useAuth(); // <-- Get login function and loading state
+  const { login, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -17,16 +19,12 @@ function LoginPage() {
     setError(null);
 
     try {
-      // Call the login function from our context
       const user = await login(email, password);
-
       if (user) {
-        // Redirect based on role
         if (user.role === 'SELLER') {
           navigate('/seller/dashboard');
         } else if (user.role === 'STAFF') {
           navigate('/admin/dashboard');
-          // Note: SuperUsers are blocked from this login form by the API
         } else {
           navigate('/');
         }
@@ -37,59 +35,60 @@ function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10">
-      <h1 className="text-3xl font-bold text-center mb-6">Login to Emporia</h1>
-
-      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <div className="min-h-[80vh] flex items-center justify-center container mx-auto px-4">
+      <Card className="w-full max-w-md p-8 bg-white/5 border-white/10 hover:shadow-cyan-glass/10">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+            System Access
+          </h1>
+          <p className="text-gray-400 mt-2 text-sm">Enter your credentials to proceed.</p>
+        </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-lg text-sm mb-6 flex items-center justify-center">
             {error}
           </div>
         )}
 
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-            Email
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="email"
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Input
+            label="Email Identity"
             type="email"
+            icon={Mail}
+            placeholder="pilot@emporia.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoFocus
           />
-        </div>
 
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-            Password
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-            id="password"
+          <Input
+            label="Security Token"
             type="password"
+            icon={Lock}
+            placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-        </div>
 
-        <div className="flex items-center justify-between">
-          <button
-            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          <Button
             type="submit"
-            disabled={loading}
+            variant="primary"
+            className="w-full justify-center gap-2 group"
+            isLoading={loading}
           >
-            {loading ? 'Logging in...' : 'Sign In'}
-          </button>
+            {loading ? 'Initializing...' : 'Authenticate'}
+            {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
+          </Button>
 
-          <Link to="/register" className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
-            Create an Account
-          </Link>
-        </div>
-      </form>
+          <div className="text-center pt-4 border-t border-white/10">
+            <Link to="/register" className="text-sm text-gray-400 hover:text-indigo-400 transition-colors">
+              New to Emporia? <span className="font-semibold text-white">Initialize Account</span>
+            </Link>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 }

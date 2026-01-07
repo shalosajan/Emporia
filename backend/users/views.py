@@ -1,9 +1,16 @@
 # users/views.py
 
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import MyTokenObtainPairSerializer, AdminTokenObtainPairSerializer, UserRegistrationSerializer, UserProfileSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import (
+    MyTokenObtainPairSerializer, AdminTokenObtainPairSerializer, 
+    UserRegistrationSerializer, UserProfileSerializer, 
+    AuditLogSerializer
+)
 from .models import CustomUser
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
+from .permissions import IsSuperAdmin, IsSupport, IsManager
+from django.shortcuts import get_object_or_404
 
 class UserRegistrationView(generics.CreateAPIView):
     """
@@ -46,12 +53,12 @@ class AdminUserListView(generics.ListAPIView):
     # Filter to show only Customers and Sellers (Exclude Staff/Admins from this view)
     queryset = CustomUser.objects.filter(role__in=[CustomUser.Role.CUSTOMER, CustomUser.Role.SELLER]).order_by('-date_joined')
     serializer_class = AdminUserSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsSupport] # Support Staff can view users
 
 class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = AdminUserSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsManager] # Only Managers can Block/Approve
 
     def perform_update(self, serializer):
         user = serializer.save()
@@ -71,7 +78,7 @@ from orders.models import Order, OrderItem
 from django.db.models import Sum, F, DecimalField
 
 class AdminStatsView(APIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsSupport] # Support Staff can view stats
 
     def get(self, request):
         total_users = CustomUser.objects.count()
@@ -90,7 +97,6 @@ class AdminStatsView(APIView):
 # --- Staff Management Views ---
 from .models import StaffProfile, AuditLog
 from .serializers import StaffUserSerializer, StaffUpdateSerializer
-from .permissions import IsSuperAdmin
 from rest_framework.exceptions import PermissionDenied
 
 class StaffListCreateView(generics.ListCreateAPIView):
@@ -141,14 +147,6 @@ class StaffDetailView(generics.RetrieveUpdateDestroyAPIView):
             raise PermissionDenied("You cannot delete your own staff account.")
         
         email = instance.email
-        # Deactivate instead of hard delete (soft delete)? 
-        # Requirement said "Deactivate Account: A 'Kill Switch'".
-        # But method is destroy. Let's do hard delete or deactivation?
-        # Standard destroy is delete. Let's stick to delete for now as 'Kill Switch' usually implies Deactivate.
-        # But if the user clicks Delete, they expect Delete.
-        # Let's Implement Deactivation via UPDATE (is_active=False).
-        # This view allows DELETE http verb which does hard delete.
-        # We can keep hard delete for cleanup.
         
         instance.delete()
         
@@ -158,3 +156,50 @@ class StaffDetailView(generics.RetrieveUpdateDestroyAPIView):
             action="DELETED_STAFF",
             target=email
         )
+
+class AuditLogListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAdminUser] # Actually IsSuperAdmin? Plan said IsSuperAdmin
+    queryset = AuditLog.objects.all().order_by('-timestamp')
+    serializer_class = AuditLogSerializer
+
+class ImpersonateUserView(APIView):
+    """
+    Allows a SuperAdmin to 'log in' as another user (Customer/Seller/Staff).
+    Use with extreme caution.
+    Logs every action in AuditLog.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        # 1. Strict Security Check
+        if not request.user.is_superuser:
+            raise PermissionDenied("Only SuperAdmins can impersonate users.")
+
+        target_id = request.data.get('user_id')
+        if not target_id:
+             return Response({"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. Get Target User
+        target_user = get_object_or_404(CustomUser, id=target_id)
+        
+        # 3. Log the Action (CRITICAL)
+        AuditLog.objects.create(
+            actor=request.user,
+            action="IMPERSONATE_START",
+            target=target_user.email,
+            details=f"SuperAdmin {request.user.email} started impersonating {target_user.email}"
+        )
+
+        # 4. Generate Tokens for Target User
+        refresh = RefreshToken.for_user(target_user)
+        access = refresh.access_token
+
+        # 5. Return Tokens + Impersonation Flag
+        return Response({
+            'refresh': str(refresh),
+            'access': str(access),
+            'username': target_user.username,
+            'email': target_user.email,
+            'role': target_user.role,
+            'is_impersonated': True # Frontend uses this to show the Banner
+        })

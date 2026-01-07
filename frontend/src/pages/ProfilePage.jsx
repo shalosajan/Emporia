@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { User, MapPin, Save, Shield } from 'lucide-react';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
 
 function ProfilePage() {
     const { user } = useAuth();
@@ -20,7 +24,6 @@ function ProfilePage() {
             try {
                 setLoading(true);
                 const response = await api.get('/api/auth/profile/');
-                // Pre-fill the form with existing data
                 setProfile({
                     first_name: response.data.first_name || '',
                     last_name: response.data.last_name || '',
@@ -56,81 +59,90 @@ function ProfilePage() {
         }
     };
 
-    if (loading) return <div className="text-center mt-10">Loading Profile...</div>;
+    if (loading) return (
+        <div className="flex justify-center items-center h-[50vh]">
+            <div className="animate-spin h-10 w-10 border-4 border-indigo-500 rounded-full border-t-transparent"></div>
+        </div>
+    );
 
     return (
-        <div className="container mx-auto max-w-lg p-6 bg-white shadow-md rounded-md mt-10">
-            <h1 className="text-2xl font-bold mb-6 text-center">My Profile</h1>
+        <div className="container mx-auto max-w-2xl px-6 py-12">
 
-            {error && <div className="bg-red-100 text-red-700 p-3 mb-4 rounded">{error}</div>}
-            {success && <div className="bg-green-100 text-green-700 p-3 mb-4 rounded">{success}</div>}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label className="block text-gray-700 font-bold mb-2">First Name</label>
-                    <input
-                        type="text"
-                        name="first_name"
-                        value={profile.first_name}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                    />
+            <div className="flex items-center gap-4 mb-8">
+                <div className="p-4 bg-indigo-500/20 rounded-full text-indigo-400 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+                    <User size={32} />
                 </div>
-
                 <div>
-                    <label className="block text-gray-700 font-bold mb-2">Last Name</label>
-                    <input
-                        type="text"
-                        name="last_name"
-                        value={profile.last_name}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                    />
+                    <h1 className="text-3xl font-bold text-white">Pilot Profile</h1>
+                    <p className="text-gray-400">Manage your identity and shipping coordinates.</p>
                 </div>
+            </div>
 
-                <div>
-                    <label className="block text-gray-700 font-bold mb-2">Address</label>
-                    <input
-                        type="text"
-                        name="address"
-                        value={profile.address}
-                        onChange={handleChange}
-                        placeholder="123 Main St"
-                        className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                    />
-                </div>
+            <Card className="p-8">
+                {error && <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 mb-6 rounded">{error}</div>}
+                {success && <div className="bg-green-500/10 border border-green-500/20 text-green-400 p-3 mb-6 rounded">{success}</div>}
 
-                <div className="flex space-x-4">
-                    <div className="w-1/2">
-                        <label className="block text-gray-700 font-bold mb-2">City</label>
-                        <input
-                            type="text"
-                            name="city"
-                            value={profile.city}
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Input
+                            label="First Designation"
+                            name="first_name"
+                            value={profile.first_name}
                             onChange={handleChange}
-                            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+                            placeholder="John"
+                        />
+                        <Input
+                            label="Last Designation"
+                            name="last_name"
+                            value={profile.last_name}
+                            onChange={handleChange}
+                            placeholder="Doe"
                         />
                     </div>
 
-                    <div className="w-1/2">
-                        <label className="block text-gray-700 font-bold mb-2">Postal Code</label>
-                        <input
-                            type="text"
-                            name="postal_code"
-                            value={profile.postal_code}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                        />
-                    </div>
-                </div>
+                    <div className="border-t border-white/5 pt-6">
+                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <MapPin size={18} className="text-indigo-400" /> Shipping Coordinates
+                        </h3>
 
-                <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
-                >
-                    Update Profile
-                </button>
-            </form>
+                        <div className="space-y-4">
+                            <Input
+                                label="Address Sector"
+                                name="address"
+                                value={profile.address}
+                                onChange={handleChange}
+                                placeholder="123 Galaxy Lane"
+                            />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <Input
+                                    label="City / Outpost"
+                                    name="city"
+                                    value={profile.city}
+                                    onChange={handleChange}
+                                    placeholder="Neo Tokyo"
+                                />
+                                <Input
+                                    label="Postal Key"
+                                    name="postal_code"
+                                    value={profile.postal_code}
+                                    onChange={handleChange}
+                                    placeholder="10001"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        size="lg"
+                        className="w-full justify-center gap-2 mt-4"
+                    >
+                        <Save size={18} /> Update Data
+                    </Button>
+                </form>
+            </Card>
         </div>
     );
 }

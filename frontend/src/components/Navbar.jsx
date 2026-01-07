@@ -1,6 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import Button from './ui/Button';
+import Badge from './ui/Badge';
+import { ShoppingBag, User, LogOut, LayoutDashboard, ShieldCheck } from 'lucide-react';
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -13,75 +16,72 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-md">
+    <nav className="sticky top-0 z-40 bg-obsidian/80 backdrop-blur-md border-b border-white/10">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
 
-        {/* Logo / Home Link */}
-        <Link to="/" className="text-xl font-bold text-gray-800">
+        {/* Logo */}
+        <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent w-fit">
           Emporia
         </Link>
 
         {/* Navigation Links */}
-        <div className="flex space-x-4 items-center">
-          <Link to="/" className="text-gray-600 hover:text-gray-800">
+        <div className="flex items-center gap-6">
+          <Link to="/" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">
             Home
           </Link>
 
-          <Link to="/cart" className="relative text-gray-600 hover:text-gray-800">
-            <span>Cart</span>
-            <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-              {getCartCount()}
-            </span>
+          {/* Cart */}
+          <Link to="/cart" className="relative text-gray-400 hover:text-white transition-colors group">
+            <ShoppingBag size={20} />
+            {getCartCount() > 0 && (
+              <span className="absolute -top-2 -right-2 bg-indigo-glow text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)]">
+                {getCartCount()}
+              </span>
+            )}
           </Link>
 
           {user ? (
             <>
-              {/* Seller Dashboard Link */}
+              {/* Vertical Divider */}
+              <div className="h-6 w-px bg-white/10 mx-2"></div>
+
+              {/* Seller Dashboard */}
               {user.role === 'SELLER' && (
-                <Link to="/seller/dashboard" className="text-gray-600 hover:text-gray-800">
-                  Dashboard
+                <Link to="/seller/dashboard" className="text-gray-400 hover:text-white transition-colors" title="Vendor Dashboard">
+                  <LayoutDashboard size={20} />
                 </Link>
               )}
 
-              {/* My Orders Link */}
-              <Link to="/orders/history" className="text-gray-600 hover:text-gray-800">
+              {/* Admin Link */}
+              {(user.is_staff || user.is_superuser) && (
+                <Link to="/admin/dashboard" className="text-red-400 hover:text-red-300 transition-colors" title="Admin Panel">
+                  <ShieldCheck size={20} />
+                </Link>
+              )}
+
+              {/* Order History Link for all users */}
+              <Link to="/orders/history" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">
                 My Orders
               </Link>
 
-              <Link to="/profile" className="text-gray-600 hover:text-gray-800">
-                My Profile
-              </Link>
-
-              {/* Admin Link (Check if user is staff/superuser) */}
-              {(user.is_staff || user.is_superuser) && (
-                <Link to="/admin/dashboard" className="text-red-600 hover:text-red-800 font-bold">
-                  Admin
+              <div className="flex items-center gap-3">
+                <Link to={user.role === 'SELLER' ? "/seller/dashboard" : "/profile"} className="text-sm font-medium text-gray-300 hover:text-white">
+                  {user.username}
                 </Link>
-              )}
-
-              <span className="text-gray-700">Hi, {user.username}!</span>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Logout
-              </button>
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="p-2">
+                  <LogOut size={18} />
+                </Button>
+              </div>
             </>
           ) : (
-            <>
-              <Link
-                to="/login"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Login
+            <div className="flex items-center gap-3">
+              <Link to="/login">
+                <Button variant="ghost" size="sm">Login</Button>
               </Link>
-              <Link
-                to="/register"
-                className="bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded"
-              >
-                Register
+              <Link to="/register">
+                <Button variant="primary" size="sm">Register</Button>
               </Link>
-            </>
+            </div>
           )}
         </div>
       </div>

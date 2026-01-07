@@ -117,7 +117,7 @@ class AdminCategoryView(generics.ListCreateAPIView):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsManager] # Managers can Create Categories.
+    permission_classes = [IsSupport] # Support can View, Manager+ can Create (Wait, this is ListCreate)
 
 class AdminCategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     """

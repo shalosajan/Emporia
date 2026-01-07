@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import { useAlert } from '../../context/AlertContext';
 
 const AdminProducts = () => {
     // const api = useAxios(); // Removed
+    const { showAlert } = useAlert();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
@@ -38,7 +40,7 @@ const AdminProducts = () => {
             setProductToDelete(null);
         } catch (error) {
             console.error("Error deleting product:", error);
-            alert("Failed to delete product.");
+            showAlert("Failed to delete product.", 'error');
         }
     };
 

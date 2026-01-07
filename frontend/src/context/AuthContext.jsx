@@ -13,35 +13,35 @@ export function AuthProvider({ children }) {
   const [authToken, setAuthToken] = useState(() =>
     localStorage.getItem('authToken') ? JSON.parse(localStorage.getItem('authToken')) : null
   );
+
+  // Backup Token for Impersonation (Stores the SuperAdmin's token)
+  const [adminBackupToken, setAdminBackupToken] = useState(() =>
+    localStorage.getItem('adminBackupToken') ? JSON.parse(localStorage.getItem('adminBackupToken')) : null
+  );
+
   const [user, setUser] = useState(() =>
     localStorage.getItem('authToken') ? jwtDecode(JSON.parse(localStorage.getItem('authToken')).access) : null
   );
+
   const [loading, setLoading] = useState(false);
 
+  // Derived state: distinct from user logic to avoid issues
+  const isImpersonating = !!adminBackupToken;
+
   // --- Login Function ---
-  // This will be called from our LoginPage
   const login = async (email, password, isAdmin = false) => {
     setLoading(true);
     try {
-      // 1. Get tokens from the DRF 'simple-jwt' endpoint
-      // If isAdmin is true, use the dedicated admin endpoint
       const endpoint = isAdmin ? '/api/auth/admin-login/' : '/api/auth/token/';
-
-      const response = await api.post(endpoint, {
-        email,
-        password,
-      });
-
+      const response = await api.post(endpoint, { email, password });
       const tokens = response.data;
-      const decodedUser = jwtDecode(tokens.access); // Decode the access token
+      const decodedUser = jwtDecode(tokens.access);
 
-      // 2. Save data to state and localStorage
       setAuthToken(tokens);
       setUser(decodedUser);
-      console.log();
       localStorage.setItem('authToken', JSON.stringify(tokens));
 
-      return decodedUser; // Signal success and return user data
+      return decodedUser;
     } catch (err) {
       console.error('Login error:', err.response?.data?.detail || err.message);
       throw new Error(err.response?.data?.detail || 'Login failed');
@@ -52,10 +52,57 @@ export function AuthProvider({ children }) {
 
   // --- Logout Function ---
   const logout = () => {
-    // Clear state and localStorage
     setAuthToken(null);
     setUser(null);
+    setAdminBackupToken(null);
     localStorage.removeItem('authToken');
+    localStorage.removeItem('adminBackupToken');
+  };
+
+  // --- Impersonate Function ---
+  const impersonate = async (userId) => {
+    setLoading(true);
+    try {
+      // 1. Call Backend to get Target User Tokens
+      const response = await api.post('/api/auth/admin/impersonate/', { user_id: userId });
+      const { access, refresh } = response.data;
+
+      // 2. Backup Current Admin Token
+      if (!authToken) throw new Error("No admin token found");
+      setAdminBackupToken(authToken);
+      localStorage.setItem('adminBackupToken', JSON.stringify(authToken));
+
+      // 3. Set New Impersonated Token
+      const newTokens = { access, refresh };
+      const decodedUser = jwtDecode(access);
+
+      setAuthToken(newTokens);
+      setUser(decodedUser);
+      localStorage.setItem('authToken', JSON.stringify(newTokens));
+
+      return decodedUser;
+    } catch (err) {
+      console.error("Impersonation Failed:", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- Stop Impersonation Function ---
+  const stopImpersonation = () => {
+    if (!adminBackupToken) return;
+
+    // Restore Admin Token
+    const decodedUser = jwtDecode(adminBackupToken.access);
+
+    setAuthToken(adminBackupToken);
+    setUser(decodedUser);
+    localStorage.setItem('authToken', JSON.stringify(adminBackupToken));
+
+    // Clear Backup
+    setAdminBackupToken(null);
+    localStorage.removeItem('adminBackupToken');
   };
 
   // Provide the context values to all child components
@@ -65,6 +112,9 @@ export function AuthProvider({ children }) {
     loading,
     login,
     logout,
+    impersonate,
+    stopImpersonation,
+    isImpersonating
   };
 
   return (
@@ -75,7 +125,6 @@ export function AuthProvider({ children }) {
 }
 
 // --- Custom Hook ---
-// This is a helper hook to easily use the auth context
 export const useAuth = () => {
   return useContext(AuthContext);
 };
