@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'users',
     'store',
     'orders',
+    'reviews', # <-- New App
     # 3rd-party apps
     'rest_framework',
     'rest_framework_simplejwt',

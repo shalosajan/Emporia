@@ -89,6 +89,8 @@ class AdminTokenObtainPairSerializer(TokenObtainPairSerializer):
             token['staff_level'] = user.staffprofile.role_level
         else:
             token['staff_level'] = None
+            
+        token['is_superuser'] = user.is_superuser
         
         return token
     
@@ -145,16 +147,18 @@ class StaffUserSerializer(serializers.ModelSerializer):
         validated_data['role'] = CustomUser.Role.STAFF
         
         # Create user using the manager method (handles hashing)
-        # Note: create_user expects positional args or kwargs. 
-        # We need to manually handle what create_user expects if we pass **validated_data directly
-        # But CustomUser.objects.create_user signature is (email, username, password=None, **extra_fields)
-        
         user = CustomUser.objects.create_user(
             email=validated_data['email'],
             username=validated_data['username'],
             password=password,
             role=CustomUser.Role.STAFF
         )
+        
+        # Security: Grant Django Admin Access if SuperAdmin
+        if role_level == 'SUPER_ADMIN':
+            user.is_superuser = True
+            user.is_staff = True
+            user.save()
         
         # Create profile
         StaffProfile.objects.create(user=user, role_level=role_level, department=department)

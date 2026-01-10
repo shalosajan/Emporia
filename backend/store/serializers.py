@@ -32,6 +32,8 @@ class ProductSerializer(serializers.ModelSerializer):
             'category_name',  # And the name for display
             'seller',         # We send the seller ID
             'seller_name',    # And the store name for display
+            'average_rating',
+            'review_count',
         ]
         
         # We protect these fields from being edited directly by the API consumer

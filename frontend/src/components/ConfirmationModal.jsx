@@ -1,41 +1,55 @@
 import React from 'react';
+import { AlertTriangle, X } from 'lucide-react';
+import Button from './ui/Button';
 
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = "Confirm", cancelText = "Cancel", variant = "danger" }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none bg-black bg-opacity-50">
-            <div className="relative w-auto max-w-md mx-auto my-6">
-                {/*content*/}
-                <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-                    {/*header*/}
-                    <div className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-t">
-                        <h3 className="text-xl font-semibold">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="relative w-full max-w-md mx-4 my-6">
+                {/* Content */}
+                <div className="border border-white/10 rounded-xl shadow-2xl relative flex flex-col w-full bg-obsidian outline-none focus:outline-none overflow-hidden">
+
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-5 border-b border-white/10 bg-white/5">
+                        <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${variant === 'danger' ? 'bg-red-500/20 text-red-500' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                                <AlertTriangle size={20} />
+                            </div>
                             {title}
                         </h3>
+                        <button
+                            onClick={onClose}
+                            className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+                        >
+                            <X size={20} />
+                        </button>
                     </div>
-                    {/*body*/}
+
+                    {/* Body */}
                     <div className="relative p-6 flex-auto">
-                        <p className="my-4 text-gray-600 text-lg leading-relaxed">
+                        <p className="text-gray-300 text-base leading-relaxed">
                             {message}
                         </p>
                     </div>
-                    {/*footer*/}
-                    <div className="flex items-center justify-end p-6 border-t border-solid border-gray-300 rounded-b">
-                        <button
-                            className="text-gray-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                            type="button"
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-end p-6 border-t border-white/10 gap-3 bg-white/5">
+                        <Button
+                            variant="ghost"
                             onClick={onClose}
+                            className="text-gray-400 hover:text-white"
                         >
-                            Cancel
-                        </button>
-                        <button
-                            className="bg-red-500 text-white active:bg-red-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                            type="button"
+                            {cancelText}
+                        </Button>
+                        <Button
+                            variant={variant} // 'danger' or 'primary'
                             onClick={onConfirm}
+                            className="shadow-lg"
                         >
-                            Delete
-                        </button>
+                            {confirmText}
+                        </Button>
                     </div>
                 </div>
             </div>

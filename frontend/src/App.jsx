@@ -30,6 +30,7 @@ import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import TeamManagement from './pages/admin/TeamManagement';
 import AdminAuditLogs from './pages/admin/AdminAuditLogs';
+import AdminReviews from './pages/admin/AdminReviews';
 import AdminLoginPage from './pages/AdminLoginPage';
 import ImpersonationBanner from './components/ImpersonationBanner';
 import { AlertProvider } from './context/AlertContext';
@@ -71,6 +72,7 @@ function App() {
           <Route path="products" element={<AdminProducts />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="orders" element={<AdminOrders />} />
+          <Route path="reviews" element={<AdminReviews />} />
           <Route path="team" element={<TeamManagement />} />
           <Route path="audit-logs" element={<AdminAuditLogs />} />
         </Route>

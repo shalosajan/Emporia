@@ -14,7 +14,7 @@ function Footer() {
               Emporia
             </h3>
             <p className="text-gray-500 text-sm">
-              Premium artifact acquisition platform for the modern galaxy.
+              Everything you need, want and love all in one place.
             </p>
           </div>
 

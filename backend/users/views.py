@@ -164,30 +164,53 @@ class AuditLogListView(generics.ListAPIView):
 
 class ImpersonateUserView(APIView):
     """
-    Allows a SuperAdmin to 'log in' as another user (Customer/Seller/Staff).
-    Use with extreme caution.
-    Logs every action in AuditLog.
+    Allows Authorized Staff to 'log in' as another user (Customer/Seller).
+    SuperAdmins can impersonate anyone.
+    Logs every action in AuditLog with a REQUIRED reason.
     """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        # 1. Strict Security Check
-        if not request.user.is_superuser:
-            raise PermissionDenied("Only SuperAdmins can impersonate users.")
-
+        actor = request.user
         target_id = request.data.get('user_id')
+        reason = request.data.get('reason', '').strip()
+
+        # 1. Validation
         if not target_id:
              return Response({"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if len(reason) < 5:
+            return Response({"error": "A valid reason (min 5 chars) is required for audit logs."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 2. Get Target User
         target_user = get_object_or_404(CustomUser, id=target_id)
         
+        # 2. Permission Logic
+        allowed = False
+        
+        # Case A: Super Admin (God Mode) - Can impersonate anyone
+        if actor.is_superuser:
+            allowed = True
+            
+        # Case B: Staff Logic
+        elif actor.role == CustomUser.Role.STAFF and hasattr(actor, 'staffprofile'):
+            level = actor.staffprofile.role_level
+            
+            # Manager -> Sellers
+            if level == 'MANAGER' and target_user.role == CustomUser.Role.SELLER:
+                allowed = True
+            # Support -> Customers
+            elif level == 'SUPPORT' and target_user.role == CustomUser.Role.CUSTOMER:
+                allowed = True
+        
+        if not allowed:
+             raise PermissionDenied("You do not have permission to impersonate this user role.")
+
         # 3. Log the Action (CRITICAL)
         AuditLog.objects.create(
-            actor=request.user,
+            actor=actor,
             action="IMPERSONATE_START",
             target=target_user.email,
-            details=f"SuperAdmin {request.user.email} started impersonating {target_user.email}"
+            details=f"Reason: {reason} | Target Role: {target_user.role}"
         )
 
         # 4. Generate Tokens for Target User
@@ -201,5 +224,5 @@ class ImpersonateUserView(APIView):
             'username': target_user.username,
             'email': target_user.email,
             'role': target_user.role,
-            'is_impersonated': True # Frontend uses this to show the Banner
+            'is_impersonated': True 
         })

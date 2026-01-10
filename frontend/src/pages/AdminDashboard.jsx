@@ -87,31 +87,34 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 {/* Chart */}
-                <Card className="lg:col-span-2 p-6 h-[400px]">
+                <Card className="lg:col-span-2 p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
                             <Activity className="text-indigo-400" />
                             Platform Growth
                         </h3>
                     </div>
-                    <ResponsiveContainer width="100%" height="85%">
-                        <AreaChart data={data}>
-                            <defs>
-                                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
-                                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-                            <XAxis dataKey="name" stroke="#ffffff50" />
-                            <YAxis stroke="#ffffff50" />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: '#0B0E14', borderColor: '#ffffff20', color: '#fff' }}
-                                itemStyle={{ color: '#10B981' }}
-                            />
-                            <Area type="monotone" dataKey="revenue" stroke="#10B981" fillOpacity={1} fill="url(#colorRevenue)" />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                    {/* Explicit container height for Recharts */}
+                    <div className="w-full h-[320px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={data}>
+                                <defs>
+                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
+                                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                                <XAxis dataKey="name" stroke="#ffffff50" />
+                                <YAxis stroke="#ffffff50" />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#0B0E14', borderColor: '#ffffff20', color: '#fff' }}
+                                    itemStyle={{ color: '#10B981' }}
+                                />
+                                <Area type="monotone" dataKey="revenue" stroke="#10B981" fillOpacity={1} fill="url(#colorRevenue)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
                 </Card>
 
                 {/* Quick Actions / System Status */}

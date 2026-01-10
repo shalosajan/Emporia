@@ -5,6 +5,7 @@ import Button from './ui/Button';
 import Card from './ui/Card';
 import Badge from './ui/Badge';
 import { ShoppingBag } from 'lucide-react';
+import StarRating from './reviews/StarRating';
 
 const ProductCard = ({ product }) => {
     return (
@@ -52,6 +53,11 @@ const ProductCard = ({ product }) => {
                     <h3 className="text-lg font-bold text-gray-100 mb-2 leading-tight group-hover:text-indigo-400 transition-colors">
                         {product.name}
                     </h3>
+
+                    <div className="flex items-center gap-2 mb-2">
+                        <StarRating rating={product.average_rating || 0} size={14} />
+                        <span className="text-xs text-gray-400">({product.review_count || 0} reviews)</span>
+                    </div>
 
                     <p className="text-sm text-gray-400 line-clamp-2 mb-4 flex-1">
                         {product.description}

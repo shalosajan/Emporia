@@ -39,7 +39,7 @@ function LoginPage() {
       <Card className="w-full max-w-md p-8 bg-white/5 border-white/10 hover:shadow-cyan-glass/10">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-            System Access
+            Welcome Back
           </h1>
           <p className="text-gray-400 mt-2 text-sm">Enter your credentials to proceed.</p>
         </div>

@@ -60,11 +60,11 @@ export function AuthProvider({ children }) {
   };
 
   // --- Impersonate Function ---
-  const impersonate = async (userId) => {
+  const impersonate = async (userId, reason) => {
     setLoading(true);
     try {
       // 1. Call Backend to get Target User Tokens
-      const response = await api.post('/api/auth/admin/impersonate/', { user_id: userId });
+      const response = await api.post('/api/auth/admin/impersonate/', { user_id: userId, reason });
       const { access, refresh } = response.data;
 
       // 2. Backup Current Admin Token

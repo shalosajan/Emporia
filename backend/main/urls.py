@@ -27,6 +27,7 @@ urlpatterns = [
     # --- Store & Orders Apps ---
     path('api/', include('store.urls')), 
     path('api/orders/', include('orders.urls')),
+    path('api/reviews/', include('reviews.urls')), # <-- Reviews App
 ]
 
 if settings.DEBUG:

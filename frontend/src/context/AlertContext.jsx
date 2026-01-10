@@ -1,4 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
+import { AlertCircle, CheckCircle, Info } from 'lucide-react';
+import Button from '../components/ui/Button';
 
 const AlertContext = createContext();
 
@@ -19,28 +21,30 @@ export const AlertProvider = ({ children }) => {
         <AlertContext.Provider value={{ showAlert, closeAlert }}>
             {children}
             {alert && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded shadow-lg w-96 transform transition-all scale-100">
-                        <div className={`mb-4 text-center ${alert.type === 'error' ? 'text-red-500' : 'text-blue-500'}`}>
-                            {/* You could add icons here based on type */}
-                            {alert.type === 'error' ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            )}
+                <div className="fixed inset-0 flex items-center justify-center z-[100] bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-obsidian border border-glass-border p-6 rounded-xl shadow-2xl w-full max-w-sm mx-4 transform transition-all scale-100 flex flex-col items-center text-center">
+                        <div className={`
+                            mb-4 p-3 rounded-full 
+                            ${alert.type === 'error' ? 'bg-red-500/20 text-red-500' :
+                                alert.type === 'success' ? 'bg-green-500/20 text-green-500' :
+                                    'bg-indigo-500/20 text-indigo-400'}
+                        `}>
+                            {alert.type === 'error' ? <AlertCircle size={32} /> :
+                                alert.type === 'success' ? <CheckCircle size={32} /> :
+                                    <Info size={32} />}
                         </div>
-                        <p className="text-gray-800 text-center mb-6">{alert.message}</p>
-                        <div className="flex justify-center">
-                            <button
+
+                        <h3 className="text-lg font-bold text-white mb-2 capitalize">{alert.type}</h3>
+                        <p className="text-gray-300 mb-6 text-sm">{alert.message}</p>
+
+                        <div className="w-full">
+                            <Button
                                 onClick={closeAlert}
-                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
+                                variant={alert.type === 'error' ? 'danger' : 'primary'}
+                                className="w-full"
                             >
                                 OK
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

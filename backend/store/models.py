@@ -43,6 +43,10 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     
+    # --- Denormalized Rating Fields ---
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00) # e.g. 4.50
+    review_count = models.PositiveIntegerField(default=0)
+    
     # --- Media Uploads ---
     # The 'upload_to' path will be relative to your MEDIA_ROOT
     image = models.ImageField(upload_to='products/%Y/%m/%d/', blank=True, null=True)

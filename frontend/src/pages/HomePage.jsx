@@ -82,7 +82,7 @@ function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-br from-white via-indigo-100 to-indigo-400 bg-clip-text text-transparent"
+            className="text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-br from-white via-indigo-100 to-indigo-400 bg-clip-text text-transparent px-4"
           >
             Discover the <br />
             <span className="text-indigo-glow drop-shadow-[0_0_20px_rgba(99,102,241,0.5)]">Extraordinary</span>
@@ -91,7 +91,7 @@ function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl text-gray-400 max-w-2xl mx-auto mb-10"
+            className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 px-4"
           >
             Explore a curated collection of premium artifacts from across the galaxy.
           </motion.p>
