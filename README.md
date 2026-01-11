@@ -62,7 +62,7 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/emporia.git
+git clone https://github.com/shalosajan/emporia.git
 cd emporia
 ```
 
@@ -117,6 +117,8 @@ Create a `.env` file in the `backend/main` directory (next to `settings.py`) wit
 # Backend Secrets
 SECRET_KEY=your_django_secret_key
 DEBUG=True
+RAZORPAY_KEY_ID="YourRazorpayKeyID"
+RAZORPAY_KEY_SECRET="YourRazorpayKeySecret"
 ALLOWED_HOSTS=127.0.0.1,localhost
 
 # Database (Optional, defaults to SQLite)
@@ -126,6 +128,19 @@ ALLOWED_HOSTS=127.0.0.1,localhost
 # DB_HOST=localhost
 # DB_PORT=5432
 ```
+
+## 🧪 Testing & Verification
+
+The platform includes a suite of custom scripts to verify backend logic, security boundaries, and API integrity. Run these from the `backend/` directory:
+
+| Script | Purpose | Command |
+| :--- | :--- | :--- |
+| **Admin Setup** | Creates the initial Superuser for the platform. | `python scripts/create_admin.py` |
+| **Audit Logs** | Verifies that staff actions are correctly recorded. | `python scripts/verify_audit_logs.py` |
+| **Permissions** | Tests RBAC logic (Support vs. Manager access). | `python scripts/verify_staff_permissions.py` |
+| **API Suite** | Comprehensive check of all Admin API endpoints. | `python scripts/verify_full_admin_suite.py` |
+
+> **Note:** Ensure the Django development server is running (`runserver`) before executing API-based verification scripts.
 
 ---
 
