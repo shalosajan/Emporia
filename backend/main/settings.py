@@ -1,24 +1,29 @@
-from decouple import config
+import os
 from pathlib import Path
+from datetime import timedelta
+from decouple import Config, RepositoryEnv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# -----------------------------------------------------------------
+# 1. BASE DIRECTORY & CONFIGURATION
+# -----------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# Robust .env loading: This ensures the file is found regardless of terminal location
+env_path = os.path.join(BASE_DIR, '.env')
+config = Config(RepositoryEnv(env_path))
 
 SECRET_KEY = config('SECRET_KEY')
-
-# ✅ 3. Read the debug setting from the .env file
-# The cast=bool part is important to convert the string "True" to a boolean
 DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
 
-ALLOWED_HOSTS = []
 
-
-# Application definition
-
+# -----------------------------------------------------------------
+# 2. APPLICATION DEFINITION
+# -----------------------------------------------------------------
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -27,15 +32,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Your Apps
     'users',
     'store',
     'orders',
-    'reviews', # <-- New App
+    'reviews',
+    
     # 3rd-party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    'django_filters', # <-- Added for filtering support
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -68,132 +76,87 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'main.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# -----------------------------------------------------------------
+# 3. DATABASE (Supabase PostgreSQL)
+# -----------------------------------------------------------------
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', default='5432'),
+        'OPTIONS': {
+            'sslmode': 'require', # <--- REQUIRED for cloud connections
+            'connect_timeout': 10,
+        },
     }
 }
 
-
-# --- Your PostgreSQL configuration can be commented out for now ---
-# from decouple import config
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': config('DB_NAME'),
-#         'USER': config('DB_USER'),
-#         'PASSWORD': config('DB_PASSWORD'),
-#         'HOST': config('DB_HOST'),
-#         'PORT': config('DB_PORT'),
-#     }
-# }
-
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+# -----------------------------------------------------------------
+# 4. AUTHENTICATION & USER MODELS
+# -----------------------------------------------------------------
 AUTH_USER_MODEL = 'users.CustomUser'
 
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+# -----------------------------------------------------------------
+# 5. INTERNATIONALIZATION
+# -----------------------------------------------------------------
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+# -----------------------------------------------------------------
+# 6. STATIC & MEDIA FILES
+# -----------------------------------------------------------------
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static'] # Optional: if you have a global static folder
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# -----------------------------------------------------------------
+# 7. CORS & REST FRAMEWORK
+# -----------------------------------------------------------------
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:5173",    # <-- ADD THIS LINE
+    "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
 
-# -----------------------------------------------------------------
-# DJANGO REST FRAMEWORK (DRF) CONFIGURATION
-# -----------------------------------------------------------------
-
 REST_FRAMEWORK = {
-    # Use JWT for authentication
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    # By default, require all endpoints to be authenticated.
-    # We will manually set public endpoints (like login/register) as 'AllowAny'.
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
 
-# -----------------------------------------------------------------
-# SIMPLE JWT CONFIGURATION
-# -----------------------------------------------------------------
-from datetime import timedelta
-
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Access token lasts 1 hour
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Refresh token lasts 7 days
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
-
-    'AUTH_HEADER_TYPES': ('Bearer',), # We will send tokens as "Bearer <token>"
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-
-    # This setting is important!
-    # It tells simple-jwt to use our 'CustomUser' model.
+    'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
 }
 
 # -----------------------------------------------------------------
-# MEDIA FILES CONFIGURATION (for user-uploaded content)
+# 8. THIRD-PARTY SERVICE CONFIG (Jazzmin & Razorpay)
 # -----------------------------------------------------------------
-
-# This is the public URL path for your media files
-MEDIA_URL = '/media/'
-
-# This is the physical path on your server where files will be stored
-MEDIA_ROOT = BASE_DIR / 'media'
-
-MEDISTATIC_ROOT = BASE_DIR / "staticfiles"
-
-# Jazzmin Settings
 JAZZMIN_SETTINGS = {
     "site_title": "Emporia Admin",
     "site_header": "Emporia",
@@ -204,8 +167,8 @@ JAZZMIN_SETTINGS = {
     "show_ui_builder": False,
 }
 
-# -----------------------------------------------------------------
-# RAZORPAY CONFIGURATION
-# -----------------------------------------------------------------
 RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET')
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
