@@ -1,16 +1,22 @@
 import os
 from pathlib import Path
 from datetime import timedelta
-from decouple import Config, RepositoryEnv
+from decouple import Config, RepositoryEnv, UndefinedValueError
 
 # -----------------------------------------------------------------
 # 1. BASE DIRECTORY & CONFIGURATION
 # -----------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Robust .env loading: This ensures the file is found regardless of terminal location
+#.env loading for production
+
 env_path = os.path.join(BASE_DIR, '.env')
-config = Config(RepositoryEnv(env_path))
+
+if os.path.exists(env_path):
+    config = Config(RepositoryEnv(env_path))
+else:
+    config = Config()  # read from environment variables only
+
 
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -118,9 +124,8 @@ USE_TZ = True
 # -----------------------------------------------------------------
 # 6. STATIC & MEDIA FILES
 # -----------------------------------------------------------------
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static'] # Optional: if you have a global static folder
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
