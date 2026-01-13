@@ -10,3 +10,4 @@ razorpay
 requests
 markdown
 django-jazzmin
+gunicorn
