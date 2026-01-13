@@ -1,21 +1,12 @@
 import os
 from pathlib import Path
 from datetime import timedelta
-from decouple import Config, RepositoryEnv, UndefinedValueError
+from decouple import config
 
 # -----------------------------------------------------------------
 # 1. BASE DIRECTORY & CONFIGURATION
 # -----------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-#.env loading for production
-
-env_path = os.path.join(BASE_DIR, '.env')
-
-if os.path.exists(env_path):
-    config = Config(RepositoryEnv(env_path))
-else:
-    config = Config()  # read from environment variables only
 
 
 SECRET_KEY = config('SECRET_KEY')
