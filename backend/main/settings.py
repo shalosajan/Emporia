@@ -142,7 +142,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://emporia-jgm.onrender.com",
+    "https://emporia-jggm.onrender.com",
     "https://emporia.vercel.app",
 ]
 
@@ -182,7 +182,7 @@ JAZZMIN_SETTINGS = {
 # 12. SECURITY (Railway HTTPS)
 # -----------------------------------------------------------------
 CSRF_TRUSTED_ORIGINS = [
-    "https://emporia-jgm.onrender.com",
+    "https://emporia-jggm.onrender.com",
     "http://localhost:5173",
 ]
 
