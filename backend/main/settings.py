@@ -142,6 +142,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://emporia-jgm.onrender.com",
+    "https://emporia.vercel.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -180,13 +182,16 @@ JAZZMIN_SETTINGS = {
 # 12. SECURITY (Railway HTTPS)
 # -----------------------------------------------------------------
 CSRF_TRUSTED_ORIGINS = [
-    "https://emporia-production.up.railway.app",
+    "https://emporia-jgm.onrender.com",
+    "http://localhost:5173",
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # -----------------------------------------------------------------
 # 13. OTHER
