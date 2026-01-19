@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, filters
 from rest_framework.exceptions import PermissionDenied
-from rest.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from .models import Review
 from store.models import Product
