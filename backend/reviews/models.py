@@ -1,6 +1,7 @@
 from django.db import models
 from users.models import CustomUser
 from store.models import Product
+from cloudinary.models import CloudinaryField
 
 class Review(models.Model):
     class Status(models.TextChoices):
@@ -16,7 +17,8 @@ class Review(models.Model):
     # User said "Photos" (plural), but creates complexity. Let's go with single ImageField for now 
     # as MVP standard in Django, or let's do a JSON list of URLs if we want to be fancy?
     # No, stick to standard Django ImageField 'photo' for now.
-    photo = models.ImageField(upload_to='reviews/%Y/%m/', blank=True, null=True) 
+    photo = CloudinaryField('photo', blank=True, null=True)
+ 
     
     is_verified_purchase = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PUBLISHED)

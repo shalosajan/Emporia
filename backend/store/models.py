@@ -3,7 +3,7 @@
 from django.db import models
 from django.conf import settings
 from users.models import SellerProfile # <-- We need to link to our SellerProfile
-
+from cloudinary.models import CloudinaryField
 # 1. --- Category Model ---
 
 class Category(models.Model):
@@ -49,7 +49,7 @@ class Product(models.Model):
     
     # --- Media Uploads ---
     # The 'upload_to' path will be relative to your MEDIA_ROOT
-    image = models.ImageField(upload_to='products/%Y/%m/%d/', blank=True, null=True)
+    image = CloudinaryField('image', blank=True, null=True)
 
     # --- Slug Field ---
     slug = models.SlugField(max_length=255, unique=True)
