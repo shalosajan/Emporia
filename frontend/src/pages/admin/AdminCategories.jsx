@@ -97,7 +97,7 @@ const AdminCategories = () => {
                     onClick={handleCreate}
                     variant="primary"
                     className="w-full md:w-auto h-11"
-                    disabled={!newCategoryName}
+                    disabled={!newCategoryName.trim()}
                 >
                     <Plus size={18} className="mr-2" /> Add Category
                 </Button>
