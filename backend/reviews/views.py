@@ -1,5 +1,6 @@
 from rest_framework import generics, permissions, filters
 from rest_framework.exceptions import PermissionDenied
+from rest.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from .models import Review
 from store.models import Product
@@ -12,6 +13,7 @@ class ProductReviewListCreateView(generics.ListCreateAPIView):
     POST: Authenticated users can create a review for a product.
     """
     serializer_class = ReviewSerializer
+    parser_classes = [MultiPartParser, FormParser]
     
     def get_permissions(self):
         if self.request.method == 'GET':

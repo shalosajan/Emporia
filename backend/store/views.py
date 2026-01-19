@@ -1,6 +1,7 @@
 # store/views.py
 
 from rest_framework import generics, permissions
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Product, Category
 from .serializers import ProductSerializer, CategorySerializer
 from .permissions import IsApprovedSeller, IsProductOwner
@@ -52,6 +53,7 @@ class SellerProductDashboard(generics.ListCreateAPIView):
     - CREATE a new product.
     """
     serializer_class = ProductSerializer
+    parser_classes = [MultiPartParser, FormParser]
     # This view is only for approved sellers
     permission_classes = [permissions.IsAuthenticated, IsApprovedSeller]
 
@@ -79,6 +81,7 @@ class SellerProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     - RETRIEVE, UPDATE, or DELETE one of their *own* products.
     """
     serializer_class = ProductSerializer
+    parser_classes = [MultiPartParser, FormParser]
     # This view requires the user to be an approved seller
     # AND the owner of the product.
     permission_classes = [permissions.IsAuthenticated, IsApprovedSeller, IsProductOwner]
