@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     "django_filters",
+    "cloudinary_storage",
+    "cloudinary",
 ]
 
 # -----------------------------------------------------------------
@@ -131,8 +133,10 @@ STATICFILES_STORAGE = (
 
 WHITENOISE_MAX_AGE = 60 * 60 * 24 * 365  # 1 year cache
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+if DEBUG:
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+
 
 # -----------------------------------------------------------------
 # 10. CORS & REST
@@ -200,3 +204,11 @@ RAZORPAY_KEY_ID = config("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = config("RAZORPAY_KEY_SECRET")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": config("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": config("CLOUDINARY_API_KEY"),
+    "API_SECRET": config("CLOUDINARY_API_SECRET"),
+}
+
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"

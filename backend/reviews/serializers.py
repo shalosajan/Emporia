@@ -4,6 +4,7 @@ from .models import Review
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
     product_name = serializers.ReadOnlyField(source='product.name')
+    photo = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Review
