@@ -12,15 +12,28 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     seller_name = serializers.CharField(source='seller.store_name', read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
-    image = serializers.ImageField(required=False, allow_null=True)
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'slug', 'description',
-            'price', 'stock', 'image',
-            'category', 'category_name',
-            'seller', 'seller_name',
-            'average_rating', 'review_count',
+            'id',
+            'name',
+            'slug',
+            'description',
+            'price',
+            'stock',
+            'image',
+            'category',
+            'category_name',
+            'seller',
+            'seller_name',
+            'average_rating',
+            'review_count',
         ]
         read_only_fields = ['seller', 'slug']
+
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url   # 👈 THIS is the key
+        return None
